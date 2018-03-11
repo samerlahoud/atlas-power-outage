@@ -1,9 +1,10 @@
 #!/root/anaconda3/bin/python
 import json
 import requests
+import time
 from ripe.atlas.cousteau import ProbeRequest
 from collections import defaultdict
-import time
+from bisect import bisect_right
 
 def get_probes(cc):
     filters = {}
@@ -15,13 +16,9 @@ def get_probes(cc):
 def get_events(cc, start_timestamp, end_timestamp):
     disco_event=defaultdict(list)
     conn_event=defaultdict(list)
-    latest_disco=defaultdict(list)
-    disco_time=defaultdict(list)
     
-    #probe_id = get_probes(cc)
-    probe_id = [34212]
-    for probe in probe_id:
-        latest_disco[probe] = 0
+    probe_id = get_probes(cc)
+    #probe_id = [34212]
 
     api_url = "https://atlas.ripe.net/api/v2/measurements/7000/results?start={}&end={}&format=json".format(start_timestamp,end_timestamp)
     response = requests.get(api_url)
@@ -32,28 +29,24 @@ def get_events(cc, start_timestamp, end_timestamp):
             if (item['prb_id'] in probe_id):
                 if(item['event'] == 'connect'):
                     conn_event[item['prb_id']].append(item['timestamp'])
-                    if(latest_disco[item['prb_id']]):
-                        disco_time[item['prb_id']].append(int(item['timestamp'])-int(latest_disco[item['prb_id']]))
                 else:
                     disco_event[item['prb_id']].append(item['timestamp'])
-                    latest_disco[item['prb_id']] = item['timestamp']
-                print("conn_event:",conn_event)
-                print("disco_event:",disco_event)
-                print("disco_time",disco_time)
-        return(conn_event,disco_event,disco_time)
+        return(conn_event,disco_event)
     else:
         return None
 
-def analyze_events(conn_event,disco_event,disco_time):
-    #sorted_event=defaultdict(list)
-    #for probe_id in disco_event:
-    #    if min(conn_event[probe_id]) < min(disco_event[probe_id]):
-    #        disco_event[probe_id].append(start_timestamp)    
-    #    sorted_event[probe_id] = sorted(disco_event[probe_id] + conn_event[probe_id])
-    #for probe_id on sorted_event:
-        
-    print(conn_event,disco_event,disco_time)
-             
+def analyze_events(conn_event,disco_event,start_time):
+    disco_time=defaultdict(list)
+    for probe_id in conn_event:
+        for conn_time in conn_event[probe_id]:
+            # Locate the the lowest nearest disconnection
+            nearest_disco = bisect_right(disco_event[probe_id], conn_time)
+            if nearest_disco == 0:
+                nearest_disco_time = int(start_time)
+            else:
+                nearest_disco_time = int(disco_event[probe_id][nearest_disco-1])
+            disco_time[probe_id].append(int(conn_time)-nearest_disco_time)
+    return(disco_time)
 
 if __name__ == "__main__":
     start_time = '1520623355'
@@ -61,6 +54,6 @@ if __name__ == "__main__":
     end_time = time.time()
     cc = 'LB'
 
-    conn_event, disco_event, disco_time = get_events(cc,start_time,end_time)
-    analyze_events(conn_event,disco_event,disco_time)
+    conn_event, disco_event = get_events(cc,start_time,end_time)
+    disco_time = analyze_events(conn_event,disco_event,start_time)
 
