@@ -18,7 +18,8 @@ def get_events(cc, start_timestamp, end_timestamp):
     latest_disco=defaultdict(list)
     disco_time=defaultdict(list)
     
-    probe_id = get_probes(cc)
+    #probe_id = get_probes(cc)
+    probe_id = [34212]
     for probe in probe_id:
         latest_disco[probe] = 0
 
@@ -36,6 +37,9 @@ def get_events(cc, start_timestamp, end_timestamp):
                 else:
                     disco_event[item['prb_id']].append(item['timestamp'])
                     latest_disco[item['prb_id']] = item['timestamp']
+                print("conn_event:",conn_event)
+                print("disco_event:",disco_event)
+                print("disco_time",disco_time)
         return(conn_event,disco_event,disco_time)
     else:
         return None
@@ -53,6 +57,7 @@ def analyze_events(conn_event,disco_event,disco_time):
 
 if __name__ == "__main__":
     start_time = '1520623355'
+    #start_time = '1519943076'
     end_time = time.time()
     cc = 'LB'
 
