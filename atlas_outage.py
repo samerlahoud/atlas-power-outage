@@ -5,6 +5,8 @@ import time
 from ripe.atlas.cousteau import ProbeRequest
 from collections import defaultdict
 from bisect import bisect_right
+import matplotlib.pyplot as plt
+import numpy as np
 
 def get_probes(cc):
     filters = {}
@@ -20,7 +22,8 @@ def get_events(cc, start_timestamp, end_timestamp):
     probe_id = get_probes(cc)
     #probe_id = [34212]
 
-    api_url = "https://atlas.ripe.net/api/v2/measurements/7000/results?start={}&end={}&format=json".format(start_timestamp,end_timestamp)
+    api_url = "https://atlas.ripe.net/api/v2/measurements/7000/results?start={}&end={}&format=json"\
+                .format(start_timestamp,end_timestamp)
     response = requests.get(api_url)
     
     if response.status_code == 200:
@@ -48,12 +51,28 @@ def analyze_events(conn_event,disco_event,start_time):
             disco_time[probe_id].append(int(conn_time)-nearest_disco_time)
     return(disco_time)
 
+def plot_disco_time(disco_time):
+    merge_disco_time = []
+    for d in disco_time.values():
+        merge_disco_time = merge_disco_time + d
+    fig, ax = plt.subplots()
+    ax.violinplot(merge_disco_time, showmedians=True)
+    ax.set_yscale("log", nonposy='clip')
+    ax.grid(True)
+    ax.set_xticklabels([])
+    ax.set_xticklabels([])
+    plt.ylabel('Disconnection time in seconds')
+    fig.savefig('disco_time_dist.png')
+    plt.close(fig)
+
 if __name__ == "__main__":
-    start_time = '1520623355'
-    #start_time = '1519943076'
+    #start_time = '1520623355'
+    start_time = '1518363868'
     end_time = time.time()
     cc = 'LB'
 
     conn_event, disco_event = get_events(cc,start_time,end_time)
     disco_time = analyze_events(conn_event,disco_event,start_time)
+    plot_disco_time(disco_time)
+    print(disco_time)
 
