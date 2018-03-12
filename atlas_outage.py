@@ -56,12 +56,12 @@ def plot_disco_time(disco_time):
     for d in disco_time.values():
         merge_disco_time = merge_disco_time + d
     fig, ax = plt.subplots()
-    ax.violinplot(merge_disco_time, showmedians=True)
-    ax.set_yscale("log", nonposy='clip')
+    ax.violinplot(np.log10(merge_disco_time), showmedians=True)
+    #ax.set_yscale("log", nonposy='clip')
     ax.grid(True)
     ax.set_xticklabels([])
     ax.set_xticklabels([])
-    plt.ylabel('Disconnection time in seconds')
+    plt.ylabel('log10(Disconnection time in seconds)')
     fig.savefig('disco_time_dist.png')
     plt.close(fig)
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     start_time = '1518363868'
     end_time = time.time()
     cc = 'LB'
-
+    #cc = 'NL'
     conn_event, disco_event = get_events(cc,start_time,end_time)
     disco_time = analyze_events(conn_event,disco_event,start_time)
     plot_disco_time(disco_time)
