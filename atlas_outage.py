@@ -5,6 +5,7 @@ import time
 from ripe.atlas.cousteau import ProbeRequest
 from collections import defaultdict
 from bisect import bisect_right
+from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -67,10 +68,14 @@ def plot_disco_duration(disco_duration,cc):
 
 def plot_disco_time(disco_event):
     merge_disco_time=[]
+    merge_disco_hour=[]
     for d in disco_event.values():
         merge_disco_time = merge_disco_time + d
+        for e in d: 
+            merge_disco_hour.append(datetime.fromtimestamp(e).hour)
     fig, ax = plt.subplots()
-    ax.scatter(merge_disco_time)
+    merge_disco_hour = np.array(merge_disco_hour)
+    ax.hist(merge_disco_hour, bins=np.arange(merge_disco_hour.min(), merge_disco_hour.max()+1))
     #ax.set_yscale("log", nonposy='clip')
     ax.grid(True)
     plt.ylabel('Disconnection time')
@@ -78,13 +83,14 @@ def plot_disco_time(disco_event):
     plt.close(fig)
 
 if __name__ == "__main__":
-    start_time = '1520630104'
-    #start_time = '1518363868'
+    #start_time = '1520630104'
+    start_time = '1518363868'
     end_time = time.time()
     #cc = 'LB'
-    cc = 'FR'
+    cc = 'BE'
     conn_event, disco_event = get_events(cc,start_time,end_time)
     disco_duration = analyze_events(conn_event,disco_event,start_time)
-    plot_disco_duration(disco_duration,cc)
+    #plot_disco_duration(disco_duration,cc)
+    plot_disco_time(disco_event)
     print(disco_duration)
 
