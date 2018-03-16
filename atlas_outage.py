@@ -70,7 +70,7 @@ if __name__ == "__main__":
     start_time = '1518363868'
     end_time = time.time()
     cc = 'LB'
-    #cc = 'NL'
+    #cc = 'FR'
     conn_event, disco_event = get_events(cc,start_time,end_time)
     disco_time = analyze_events(conn_event,disco_event,start_time)
     plot_disco_time(disco_time)
