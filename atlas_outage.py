@@ -39,7 +39,7 @@ def get_events(cc, start_timestamp, end_timestamp):
         return None
 
 def analyze_events(conn_event,disco_event,start_time):
-    disco_time=defaultdict(list)
+    disco_duration=defaultdict(list)
     for probe_id in conn_event:
         for conn_time in conn_event[probe_id]:
             # Locate the the lowest nearest disconnection
@@ -48,31 +48,31 @@ def analyze_events(conn_event,disco_event,start_time):
                 nearest_disco_time = int(start_time)
             else:
                 nearest_disco_time = int(disco_event[probe_id][nearest_disco-1])
-            disco_time[probe_id].append(int(conn_time)-nearest_disco_time)
-    return(disco_time)
+            disco_duration[probe_id].append(int(conn_time)-nearest_disco_time)
+    return(disco_duration)
 
-def plot_disco_time(disco_time):
-    merge_disco_time = []
-    for d in disco_time.values():
-        merge_disco_time = merge_disco_time + d
+def plot_disco_duration(disco_duration,cc):
+    merge_disco_duration = []
+    for d in disco_duration.values():
+        merge_disco_duration = merge_disco_duration + d
     fig, ax = plt.subplots()
-    ax.violinplot(np.log10(merge_disco_time), showmedians=True)
+    ax.violinplot(np.log10(merge_disco_duration), showmedians=True)
     #ax.set_yscale("log", nonposy='clip')
     ax.grid(True)
     ax.set_xticklabels([])
     ax.set_xticklabels([])
-    plt.ylabel('log10(Disconnection time in seconds)')
-    fig.savefig('disco_time_dist.png')
+    plt.ylabel('log10(Disconnection duration in seconds)')
+    fig.savefig('disco_duration_dist_{}.png'.format(cc))
     plt.close(fig)
 
 if __name__ == "__main__":
     #start_time = '1520623355'
     start_time = '1518363868'
     end_time = time.time()
-    cc = 'LB'
-    #cc = 'FR'
+    #cc = 'LB'
+    cc = 'BE'
     conn_event, disco_event = get_events(cc,start_time,end_time)
-    disco_time = analyze_events(conn_event,disco_event,start_time)
-    plot_disco_time(disco_time)
-    print(disco_time)
+    disco_duration = analyze_events(conn_event,disco_event,start_time)
+    plot_disco_duration(disco_duration,cc)
+    print(disco_duration)
 
