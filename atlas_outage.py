@@ -65,12 +65,24 @@ def plot_disco_duration(disco_duration,cc):
     fig.savefig('disco_duration_dist_{}.png'.format(cc))
     plt.close(fig)
 
+def plot_disco_time(disco_event):
+    merge_disco_time=[]
+    for d in disco_event.values():
+        merge_disco_time = merge_disco_time + d
+    fig, ax = plt.subplots()
+    ax.scatter(merge_disco_time)
+    #ax.set_yscale("log", nonposy='clip')
+    ax.grid(True)
+    plt.ylabel('Disconnection time')
+    fig.savefig('disco_time_dist_{}.png'.format(cc))
+    plt.close(fig)
+
 if __name__ == "__main__":
-    #start_time = '1520623355'
-    start_time = '1518363868'
+    start_time = '1520630104'
+    #start_time = '1518363868'
     end_time = time.time()
     #cc = 'LB'
-    cc = 'BE'
+    cc = 'FR'
     conn_event, disco_event = get_events(cc,start_time,end_time)
     disco_duration = analyze_events(conn_event,disco_event,start_time)
     plot_disco_duration(disco_duration,cc)
