@@ -2,6 +2,7 @@
 import json
 import requests
 import time
+import sys
 from ripe.atlas.cousteau import ProbeRequest
 from collections import defaultdict
 from bisect import bisect_right
@@ -83,18 +84,26 @@ def plot_disco_time(disco_event):
     plt.close(fig)
 
 if __name__ == "__main__":
-    start_time = '1520630104'
-    #start_time = '1518363868'
+    cc = str(sys.argv[1])
+    #start_time = '1520630104'
+    start_time = '1523905107'
     end_time = time.time()
-    cc = 'LB'
-    #cc = 'BE'
     conn_event, disco_event = get_events(cc,start_time,end_time)
+    conn_event_json = json.dumps(conn_event)
+    disco_event_json = json.dumps(disco_event)
     disco_duration = analyze_events(conn_event,disco_event,start_time)
-    #plot_disco_duration(disco_duration,cc)
-    #plot_disco_time(disco_event)
-    print(disco_duration)
     disco_duration_json = json.dumps(disco_duration)
-    f = open("disco_duration_{}.json".format(cc),"w")
+
+    plot_disco_duration(disco_duration,cc)
+    plot_disco_time(disco_event)
+
+    f = open("conn_event_{}_{}_{}.json".format(cc,start_time,end_time),"w")
+    f.write(conn_event_json)
+    f.close()
+    f = open("disco_event_{}_{}_{}.json".format(cc,start_time,end_time),"w")
+    f.write(disco_event_json)
+    f.close()
+    f = open("disco_duration_{}_{}_{}.json".format(cc,start_time,end_time),"w")
     f.write(disco_duration_json)
     f.close()
     
