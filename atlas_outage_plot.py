@@ -5,7 +5,7 @@ import time
 import sys
 from ripe.atlas.cousteau import ProbeRequest
 from collections import defaultdict
-from bisect import bisect_right
+from bisect import bisect_right, bisect_left
 from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
@@ -40,18 +40,25 @@ def get_events(cc, start_timestamp, end_timestamp):
     else:
         return None
 
-def analyze_events(conn_event,disco_event,start_time):
+def analyze_events(cc, start_time, end_time):
     disco_duration=defaultdict(list)
+    conn_event, disco_event = get_events(cc,start_time,end_time)
     for probe_id in conn_event:
         for conn_time in conn_event[probe_id]:
             # Locate the the lowest nearest disconnection
             nearest_disco = bisect_right(disco_event[probe_id], conn_time)
             if nearest_disco == 0:
                 nearest_disco_time = int(start_time)
+                disco_event[probe_id].insert(0,int(start_time))
             else:
                 nearest_disco_time = int(disco_event[probe_id][nearest_disco-1])
             disco_duration[probe_id].append(int(conn_time)-nearest_disco_time)
-    return(disco_duration)
+        for disco_time in disco_event[probe_id]:
+            # Locate the the highest nearest connection
+            nearest_conn = bisect_left(conn_event[probe_id], disco_time)
+            if nearest_conn == len(conn_event[probe_id]):
+                disco_duration[probe_id].append(int(end_time)-disco_time)
+    return(conn_event, disco_event, disco_duration)
 
 def plot_disco_duration(disco_duration,cc):
     merge_disco_duration = []
@@ -88,10 +95,10 @@ if __name__ == "__main__":
     #start_time = '1520630104'
     start_time = '1523905107'
     end_time = time.time()
-    conn_event, disco_event = get_events(cc,start_time,end_time)
+    conn_event, disco_event, disco_duration = analyze_events(cc,start_time,end_time)
+
     conn_event_json = json.dumps(conn_event)
     disco_event_json = json.dumps(disco_event)
-    disco_duration = analyze_events(conn_event,disco_event,start_time)
     disco_duration_json = json.dumps(disco_duration)
 
     plot_disco_duration(disco_duration,cc)
