@@ -90,6 +90,19 @@ def plot_disco_time(disco_event):
     fig.savefig('disco_time_dist_{}.png'.format(cc))
     plt.close(fig)
 
+def plot_disco_occurence(disco_duration):
+    disco_num = [len(d) for d in disco_duration.values()]
+    disco_avg = [sum(d)/(3600*len(d)) for d in disco_duration.values()]
+
+    fig, ax = plt.subplots()
+    #ax.set_xscale("log", nonposy='clip')
+    ax.grid(True)
+    ax.plot(disco_avg,disco_num,'x')
+    plt.xlabel('Disconnection time')
+    plt.ylabel('Number of disconnections')
+    fig.savefig('disco_occurence_{}.png'.format(cc))
+    plt.close(fig)
+
 if __name__ == "__main__":
     cc = str(sys.argv[1])
     #start_time = '1520630104'
@@ -103,6 +116,7 @@ if __name__ == "__main__":
 
     plot_disco_duration(disco_duration,cc)
     plot_disco_time(disco_event)
+    plot_disco_occurence(disco_duration)
 
     f = open("conn_event_{}_{}_{}.json".format(cc,start_time,end_time),"w")
     f.write(conn_event_json)
