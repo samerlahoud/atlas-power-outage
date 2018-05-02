@@ -92,13 +92,13 @@ def plot_disco_time(disco_event):
 
 def plot_disco_occurence(disco_duration):
     disco_num = [len(d) for d in disco_duration.values()]
-    disco_avg = [sum(d)/(3600*len(d)) for d in disco_duration.values()]
+    disco_avg = [sum(d)/len(d) for d in disco_duration.values()]
 
     fig, ax = plt.subplots()
-    #ax.set_xscale("log", nonposy='clip')
+    ax.set_xscale("log")
     ax.grid(True)
     ax.plot(disco_avg,disco_num,'x')
-    plt.xlabel('Disconnection time')
+    plt.xlabel('Disconnection duration in seconds')
     plt.ylabel('Number of disconnections')
     fig.savefig('disco_occurence_{}.png'.format(cc))
     plt.close(fig)
